@@ -1,0 +1,4 @@
+// sw.js - najmanjši možen service worker
+self.addEventListener('install', e => self.skipWaiting());
+self.addEventListener('activate', e => self.clients.claim());
+self.addEventListener('fetch', e => {});

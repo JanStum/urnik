@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html lang="sl">
+<head>
+<link rel="manifest" href="manifest.json">
+<meta name="theme-color" content="#1e2230">
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Urnik</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#e6e9ef; --card:#ffffff; --line:#d8dce6;
+    --text:#1e2230; --muted:#8a90a6;
+    --lw:1.5px;
+  }
+  body.dark{
+    --bg:#12141b; --card:#1e2230; --line:#363c54;
+    --text:#eef0f6; --muted:#9aa0b8;
+  }
+  *{box-sizing:border-box}
+  body{margin:0;font-family:'Inter',system-ui,sans-serif;background:var(--bg);color:var(--text);padding:24px 16px 40px;transition:background .25s,color .25s}
+  .wrap{max-width:1100px;margin:0 auto}
+  .topbar{display:flex;align-items:center;justify-content:space-between;margin-bottom:16px}
+  h1{margin:0;font-size:28px;font-weight:800;letter-spacing:-0.02em;text-align:center;flex:1}
+  .toggle{display:flex;align-items:center;gap:8px;font-size:13px;color:var(--muted);white-space:nowrap}
+  .switch{position:relative;width:44px;height:24px;background:#cbd0dd;border-radius:999px;cursor:pointer;border:none;transition:.2s}
+  .switch::after{content:'';position:absolute;top:3px;left:3px;width:18px;height:18px;background:#fff;border-radius:50%;transition:.2s}
+  body.dark .switch{background:#5b7cff}
+  body.dark .switch::after{left:23px}
+  .schedule{display:grid;grid-template-columns:56px repeat(5,1fr);background:var(--card);border:var(--lw) solid var(--line);border-radius:8px;overflow:hidden}
+  .header{padding:12px 6px;text-align:center;font-weight:700;font-size:14px;border-bottom:var(--lw) solid var(--line);background:var(--card)}
+  .gutter{position:relative;height:720px;border-right:var(--lw) solid var(--line)}
+  .day{position:relative;height:720px;border-right:var(--lw) solid var(--line)}
+  .day:last-child{border-right:none}
+  .hour-line{position:absolute;left:0;right:0;border-top:var(--lw) solid var(--line)}
+  .hour-line.noline{border-top-color:transparent}
+  .hour-label{position:absolute;right:6px;top:-10px;font-size:13px;font-weight:600;color:var(--muted);background:var(--card);padding:0 4px;font-variant-numeric:tabular-nums}
+  .footer{grid-column:1 / -1;height:45px;border-top:var(--lw) solid var(--line);background:var(--card)}
+  .event{position:absolute;left:6px;right:6px;border-radius:6px;padding:7px 8px;font-size:12.5px;line-height:1.35;overflow:hidden;display:flex;flex-direction:column;justify-content:space-between;color:#2b2f3f}
+  .event .top{font-size:13px;font-weight:700}
+  .event .top .type{color:#6b7280;font-weight:700}
+  .event .bottom{display:flex;justify-content:space-between;align-items:flex-end;gap:6px;margin-top:6px;font-size:12px;color:#3f455c}
+  .event .bottom .room{text-align:right;flex-shrink:0}
+  .km{background:#f5c1c1}
+  .mf{background:#bdd7f2}
+  .fp{background:#bfe8cf}
+  .em{background:#f9e7a8}
+  .inf{background:#d9c6ef}
+  .pf{background:#ffd9b3}
+  .ko{background:#d8dbe1}
+  body.dark .km{background:#e8a0a0}
+  body.dark .mf{background:#9ec2e8}
+  body.dark .fp{background:#9ed4b5}
+  body.dark .em{background:#efdd9a}
+  body.dark .inf{background:#c3a9e3}
+  body.dark .pf{background:#f0bd8a}
+  body.dark .ko{background:#aeb4c2}
+  @media (max-width:700px){.schedule{grid-template-columns:44px repeat(5,minmax(130px,1fr));overflow-x:auto}}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="topbar">
+    <div style="width:110px"></div>
+    <h1>Urnik</h1>
+    <label class="toggle">Dark mode <button class="switch" id="dmToggle" aria-label="dark mode"></button></label>
+  </div>
+  <div class="schedule" id="schedule">
+    <div class="header corner"></div>
+    <div class="header">Ponedeljek</div>
+    <div class="header">Torek</div>
+    <div class="header">Sreda</div>
+    <div class="header">Četrtek</div>
+    <div class="header">Petek</div>
+  </div>
+</div>
+<script>
+const START = 8*60, END = 20*60, TOTAL = END-START;
+function toMin(s){ const p=s.replace(',','.').split('.'); return parseInt(p[0])*60+parseInt(p[1]||0); }
+const events = [
+  { d:1, cls:'km', name:'Kvantna mehanika', type:'V', prof:'Tomaž Rejec', room:'F2', s:'8.00', e:'10.00' },
+  { d:1, cls:'mf', name:'Matematična fizika II', type:'V', prof:'Urban Duh', room:'F5', s:'10.00', e:'12.00' },
+  { d:2, cls:'mf', name:'Matematična fizika II', type:'P', prof:'Lenart Zadnik', room:'F2', s:'8.00', e:'10.00' },
+  { d:2, cls:'fp', name:'Fizikalni praktikum V', type:'L', prof:'Jošt Stergar', room:'Pra3', s:'10.00', e:'15.00' },
+  { d:3, cls:'km', name:'Kvantna mehanika', type:'P', prof:'Anton Ramšak', room:'F2', s:'8.00', e:'11.00' },
+  { d:3, cls:'em', name:'Elektromagnetno polje', type:'P', prof:'Miha Ravnik', room:'F2', s:'11.00', e:'14.00' },
+  { d:4, cls:'em', name:'Elektromagnetno polje', type:'V', prof:'Martin Klanjšek', room:'F4', s:'13.00', e:'15.00' },
+  { d:4, cls:'inf', name:'Industrijska fizika', type:'P', prof:'Nejc Košnik', room:'F4', s:'15.00', e:'17.00' },
+  { d:4, cls:'inf', name:'Industrijska fizika', type:'S', prof:'Nejc Košnik', room:'F4', s:'17.00', e:'18.00' },
+  { d:4, cls:'ko', name:'Kolokvij', type:'O', prof:'', room:'MFP, VFP, F1', s:'18.00', e:'20.00' },
+  { d:5, cls:'pf', name:'Posredovanje fizike', type:'V', prof:'Sergej Faletič', room:'S206', s:'10.00', e:'12.00' },
+  { d:5, cls:'pf', name:'Posredovanje fizike', type:'P', prof:'Aleš Mohorič', room:'F6', s:'12.00', e:'14.00' },
+  { d:5, cls:'ko', name:'Kolokvij', type:'O', prof:'', room:'F1, VFP, P.02, MFP', s:'15.00', e:'20.00' },
+];
+const schedule = document.getElementById('schedule');
+const gutter = document.createElement('div'); gutter.className='gutter';
+for(let h=8; h<=20; h++){
+  const m=h*60; const top=(m-START)/TOTAL*100;
+  const line=document.createElement('div');
+  line.className='hour-line'+((h===8||h===20)?' noline':'');
+  line.style.top=top+'%';
+  line.innerHTML='<span class="hour-label">'+h+'</span>';
+  gutter.appendChild(line);
+}
+schedule.appendChild(gutter);
+const cols={};
+for(let d=1; d<=5; d++){
+  const col=document.createElement('div'); col.className='day';
+  for(let h=8; h<=20; h++){
+    if(h===8||h===20) continue;
+    const m=h*60; const top=(m-START)/TOTAL*100;
+    const line=document.createElement('div'); line.className='hour-line'; line.style.top=top+'%'; col.appendChild(line);
+  }
+  schedule.appendChild(col); cols[d]=col;
+}
+events.forEach(ev=>{
+  const s=toMin(ev.s), e=toMin(ev.e);
+  const top=(s-START)/TOTAL*100, h=(e-s)/TOTAL*100;
+  const el=document.createElement('div'); el.className='event '+ev.cls;
+  el.style.top='calc('+top+'% + 3px)'; el.style.height='calc('+h+'% - 6px)';
+  el.innerHTML='<div class="top">'+ev.name+' <span class="type">('+ev.type+')</span></div><div class="bottom"><span>'+ev.prof+'</span><span class="room">'+ev.room+'</span></div>';
+  cols[ev.d].appendChild(el);
+});
+const footer=document.createElement('div'); footer.className='footer'; schedule.appendChild(footer);
+document.getElementById('dmToggle').onclick=()=>document.body.classList.toggle('dark');
+</script>
+</body>
+</html>

@@ -1,0 +1,17 @@
+{
+  "name": "Urnik",
+  "short_name": "Urnik",
+  "description": "Urnik - Schedule, Timetable, Urnik za faks",
+  "keywords": ["Schedule", "Timetable", "Urnik"],
+  "start_url": ".",
+  "display": "standalone",
+  "background_color": "#ffffff",
+  "theme_color": "#1e2230",
+  "icons": [
+    {
+      "src": "icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png"
+    }
+  ]
+}
