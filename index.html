@@ -82,9 +82,9 @@ const events = [
   { d:1, cls:'km', name:'Kvantna mehanika', type:'V', prof:'Tomaž Rejec', room:'F2', s:'8.00', e:'10.00' },
   { d:1, cls:'mf', name:'Matematična fizika II', type:'V', prof:'Urban Duh', room:'F5', s:'10.00', e:'12.00' },
   { d:2, cls:'mf', name:'Matematična fizika II', type:'P', prof:'Lenart Zadnik', room:'F2', s:'8.00', e:'10.00' },
+  { d:2, cls:'em', name:'Elektromagnetno polje', type:'V', prof:'Martin Klanjšek', room:'F2', s:'10.00', e:'12.00' },
   { d:3, cls:'km', name:'Kvantna mehanika', type:'P', prof:'Anton Ramšak', room:'F2', s:'8.00', e:'11.00' },
   { d:3, cls:'em', name:'Elektromagnetno polje', type:'P', prof:'Miha Ravnik', room:'F2', s:'11.00', e:'14.00' },
-  { d:4, cls:'em', name:'Elektromagnetno polje', type:'V', prof:'Martin Klanjšek', room:'F4', s:'13.00', e:'15.00' },
   { d:4, cls:'inf', name:'Industrijska fizika', type:'P', prof:'Nejc Košnik', room:'F4', s:'15.00', e:'17.00' },
   { d:4, cls:'inf', name:'Industrijska fizika', type:'S', prof:'Nejc Košnik', room:'F4', s:'17.00', e:'18.00' },
   { d:4, cls:'ko', name:'Kolokvij', type:'O', prof:'', room:'MFP, VFP, F1', s:'18.00', e:'20.00' },
@@ -114,7 +114,6 @@ for(let d=1; d<=5; d++){
   }
   schedule.appendChild(col); cols[d]=col;
 }
-// side-by-side layout for overlapping events
 events.forEach(ev=>{ ev._s=toMin(ev.s); ev._e=toMin(ev.e); });
 for(let d=1; d<=5; d++){
   const dayEvents = events.filter(e=>e.d===d).sort((a,b)=>a._s-b._s || a._e-b._e);
